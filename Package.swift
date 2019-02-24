@@ -15,8 +15,5 @@ let package = Package(
         .target(
             name: "timestampname-swift",
             dependencies: []),
-        .testTarget(
-            name: "timestampname-swiftTests",
-            dependencies: ["timestampname-swift"]),
     ]
 )
