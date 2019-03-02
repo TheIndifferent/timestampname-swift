@@ -29,7 +29,7 @@ func execute(cmdArgs: CmdArgs) throws {
     }
 
     info("Preparing rename operations...")
-    let renameOperations = prepareRenameOperations(items: collectedMetadata.items, noPrefix: cmdArgs.noPrefix)
+    let renameOperations = try prepareRenameOperations(items: collectedMetadata.items, noPrefix: cmdArgs.noPrefix)
     info(" done.\n")
 
     info("Verifying:")

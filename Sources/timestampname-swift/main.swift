@@ -32,9 +32,7 @@ for arg in CommandLine.arguments {
         continue
     }
     switch arg {
-    case "-h":
-        printHelpAndExit()
-    case "--help":
+    case "-h", "--help":
         printHelpAndExit()
     case "-dry":
         dryRun = true
