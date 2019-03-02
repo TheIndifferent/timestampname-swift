@@ -52,7 +52,7 @@ for arg in CommandLine.arguments {
 
 let cmdArgs = CmdArgs(dryRun: dryRun, noPrefix: noPrefix, utc: utc, debug: debug)
 do {
-    try exec(cmdArgs: cmdArgs)
+    try execute(cmdArgs: cmdArgs)
     exit(0)
 } catch {
     eprint("Unexpected error: \(error)")
