@@ -1,5 +1,3 @@
-import Foundation
-
 struct CmdArgs {
     let dryRun: Bool
     let noPrefix: Bool
