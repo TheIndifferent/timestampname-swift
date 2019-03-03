@@ -15,12 +15,12 @@ func verifyRenameOperations(operations: Array<RenameOperation>, longestSourceNam
         info("    \(operation.from.pad(longestSourceName))    =>    \(operation.to)\n")
         // check for target name duplicates:
         if duplicates.contains(operation.to) {
-            throw GenericError.message("Duplicate rename: \(operation.to)")
+            throw FileError(fileName: operation.to, message: "Duplicate target file")
         }
         duplicates.insert(operation.to)
         // check for renaming duplicates:
         if operation.from != operation.to && FileManager.default.fileExists(atPath: operation.to) {
-            throw GenericError.message("File already exists on file system: \(operation.to)")
+            throw FileError(fileName: operation.to, message: "File already exists on file system")
         }
     }
 }

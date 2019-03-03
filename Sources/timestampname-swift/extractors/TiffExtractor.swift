@@ -12,7 +12,7 @@ extension TiffExtractor: Extractor {
         case "MM":
             return Endianness.Big
         default:
-            throw IOError.badFileStructure("Bad TIFF header: \(tiffEndiannessHeader)")
+            throw IOError("Bad TIFF header: \(tiffEndiannessHeader)")
         }
     }
 
@@ -34,7 +34,7 @@ extension TiffExtractor: Extractor {
         // that further identifies the file as a TIFF file.
         let tiffMagic = try input.readU16();
         if tiffMagic != 42 {
-            throw IOError.badFileStructure("Bad TIFF magic number, expected 42 but got: \(tiffMagic)")
+            throw IOError("Bad TIFF magic number, expected 42 but got: \(tiffMagic)")
         }
 
         return ""

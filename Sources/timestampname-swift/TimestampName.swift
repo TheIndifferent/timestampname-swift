@@ -73,11 +73,15 @@ fileprivate func processFiles(_ filesList: Array<String>, utc: Bool) throws -> C
         if let extractor = extractors[fileExt] {
             var data = try Data(contentsOf: fileUrl, options: .alwaysMapped)
             var input: Input = DataInput(data: data)
-            let timestamp = try extractor.extractMetadataCreationTimestamp(input: &input)
-            let md = FileMetadata(fileName: fileName, creationTimestamp: timestamp, fileExt: fileExt)
-            items.append(md)
-            if fileName.count > longestSourceName {
-                longestSourceName = fileName.count
+            do {
+                let timestamp = try extractor.extractMetadataCreationTimestamp(input: &input)
+                let md = FileMetadata(fileName: fileName, creationTimestamp: timestamp, fileExt: fileExt)
+                items.append(md)
+                if fileName.count > longestSourceName {
+                    longestSourceName = fileName.count
+                }
+            } catch let err as IOError {
+                throw FileError(fileName: fileName, message: err.message)
             }
         }
     }

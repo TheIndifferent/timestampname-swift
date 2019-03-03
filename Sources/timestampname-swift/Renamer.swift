@@ -2,7 +2,7 @@ import Foundation
 
 fileprivate func compareFileMetadatas(_ md1: FileMetadata, _ md2: FileMetadata) throws -> Bool {
     if md1.fileName == md2.fileName {
-        throw GenericError.message("File encountered twice: \(md1.fileName)")
+        throw FileError(fileName: md1.fileName, message: "File encountered twice")
     }
     let ct1 = md1.creationTimestamp
     let ct2 = md2.creationTimestamp
@@ -47,7 +47,7 @@ fileprivate func determinePrefixWidth(itemCount: Int) throws -> Int {
     case 10000..<100000:
         return 5
     default:
-        throw GenericError.message("Too many files: \(itemCount)")
+        throw TaskError("Too many files: \(itemCount)")
     }
 }
 

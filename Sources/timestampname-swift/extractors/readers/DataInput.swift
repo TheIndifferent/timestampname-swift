@@ -31,7 +31,10 @@ extension DataInput: Input {
     mutating func section(ofLength: Int, withByteOrder: Endianness) throws -> Input {
         let start = self.offset + self.cursor
         if start + ofLength > self.data.count {
-            throw IOError.endOfSection(position: start, limit: self.limit, requested: ofLength)
+            throw IOError("""
+                          Requested section is larger than parent section:
+                          position: \(start), limit: \(self.limit), requested: \(ofLength)
+                          """)
         }
         return DataInput(data: self.data, offset: start, limit: ofLength, withByteOrder: withByteOrder)
     }
@@ -39,19 +42,28 @@ extension DataInput: Input {
     mutating func readString(_ ofLength: Int) throws -> String {
         let start = self.offset + self.cursor
         if start + ofLength >= self.data.count {
-            throw IOError.endOfSection(position: start, limit: self.limit, requested: ofLength)
+            throw IOError("""
+                          Reading beyond section limit:
+                          position: \(start), limit: \(self.limit), requested: \(ofLength)
+                          """)
         }
         if let res = String(data: self.data.subdata(in: start..<start+ofLength), encoding: .ascii) {
             self.cursor += ofLength
             return res
         }
-        throw IOError.failedToReadString(position: start, requested: ofLength)
+        throw IOError("""
+                      Failed to read string:
+                      position: \(start), limit: \(self.limit), requested: \(ofLength)
+                      """)
     }
 
     mutating func readU16() throws -> UInt16 {
         let start = self.offset + self.cursor
         if start + 2 >= self.data.count {
-            throw IOError.endOfSection(position: start, limit: self.limit, requested: 2)
+            throw IOError("""
+                          Failed to read UInt16:
+                          position: \(start), limit: \(self.limit)
+                          """)
         }
         let res: UInt16 = self.data
                 .subdata(in: start..<start + 2)

@@ -52,6 +52,17 @@ let cmdArgs = CmdArgs(dryRun: dryRun, noPrefix: noPrefix, utc: utc, debug: debug
 do {
     try execute(cmdArgs: cmdArgs)
     exit(0)
+} catch let fileError as FileError {
+    eprint("""
+           \nFailure:
+           \tFile:    \(fileError.fileName)
+           \tMessage: \(fileError.message)\n
+           """)
+} catch let taskError as TaskError {
+    eprint("""
+           \nFailure:
+           \tMessage: \(taskError.message)\n
+           """)
 } catch {
     eprint("\nUnexpected error: \(error)\n")
 }
