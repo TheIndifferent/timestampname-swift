@@ -54,7 +54,7 @@ fileprivate func formatTargetFileName(item: FileMetadata, index: Int, noPrefix: 
     if noPrefix {
         return "\(item.creationTimestamp).\(item.fileExt)"
     }
-    return "\(index)-\(item.creationTimestamp).\(item.fileExt)"
+    return "\(index+1)-\(item.creationTimestamp).\(item.fileExt)"
 }
 
 func prepareRenameOperations(items: Array<FileMetadata>, noPrefix: Bool) throws -> Array<RenameOperation> {
