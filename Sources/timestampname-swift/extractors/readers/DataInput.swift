@@ -24,9 +24,13 @@ struct DataInput {
 
 extension DataInput: Input {
 
+    var count: Int {
+        return self.data.count
+    }
+
     mutating func section(ofLength: Int, withByteOrder: Endianness) throws -> Input {
         let start = self.offset + self.cursor
-        if start + ofLength >= self.data.count {
+        if start + ofLength > self.data.count {
             throw IOError.endOfSection(position: start, limit: self.limit, requested: ofLength)
         }
         return DataInput(data: self.data, offset: start, limit: ofLength, withByteOrder: withByteOrder)
