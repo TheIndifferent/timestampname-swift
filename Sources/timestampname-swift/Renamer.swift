@@ -51,10 +51,11 @@ fileprivate func determinePrefixWidth(itemCount: Int) throws -> Int {
     }
 }
 
-fileprivate func formatTargetFileName(item: FileMetadata, index: Int, noPrefix: Bool) -> String {
+fileprivate func formatTargetFileName(item: FileMetadata, index: Int, prefixWidth: Int, noPrefix: Bool) -> String {
     if noPrefix {
         return "\(item.creationTimestamp).\(item.fileExt)"
     }
+    // TODO use prefixWidth to pad index with zeroes:
     return "\(index+1)-\(item.creationTimestamp).\(item.fileExt)"
 }
 
@@ -63,9 +64,12 @@ func prepareRenameOperations(items: Array<FileMetadata>, noPrefix: Bool) throws 
     let sortedItems = try items.sorted(by: compareFileMetadatas)
 
     var operations = [RenameOperation]()
-    for (index, metadata) in items.enumerated() {
+    for (index, metadata) in sortedItems.enumerated() {
         let operation = RenameOperation(from: metadata.fileName,
-                                        to: formatTargetFileName(item: metadata, index: index, noPrefix: noPrefix))
+                                        to: formatTargetFileName(item: metadata,
+                                                                 index: index,
+                                                                 prefixWidth: prefixWidth,
+                                                                 noPrefix: noPrefix))
         operations.append(operation)
     }
     return operations

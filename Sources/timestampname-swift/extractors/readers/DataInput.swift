@@ -3,18 +3,18 @@ import Foundation
 struct DataInput {
     let data: Data
     let bo: Endianness
-    let offset: Int
-    var cursor = 0
-    let limit: Int
+    let offset: UInt64
+    var cursor: UInt64 = 0
+    let limit: UInt64
 
     init(data: Data) {
         self.data = data
         self.offset = 0
-        self.limit = data.count
+        self.limit = UInt64(data.count)
         self.bo = Endianness.Big
     }
 
-    fileprivate init(data: Data, offset: Int, limit: Int, withByteOrder: Endianness) {
+    fileprivate init(data: Data, offset: UInt64, limit: UInt64, withByteOrder: Endianness) {
         self.data = data
         self.offset = offset
         self.limit = limit
@@ -24,30 +24,42 @@ struct DataInput {
 
 extension DataInput: Input {
 
-    var count: Int {
-        return self.data.count
+    var count: UInt64 {
+        return UInt64(self.data.count)
     }
 
-    mutating func section(ofLength: Int, withByteOrder: Endianness) throws -> Input {
-        let start = self.offset + self.cursor
-        if start + ofLength > self.data.count {
+    private func checkOperationOverflows(targetOffset: UInt64, operation: String) throws {
+        let totalOffset = self.offset + self.cursor + targetOffset
+        if totalOffset >= UInt64(Int.max) {
             throw IOError("""
-                          Requested section is larger than parent section: \
-                          position: \(start), limit: \(self.limit), requested: \(ofLength)
+                          '\(operation)' operation overflows platform Int value, \
+                          offset: \(offset), cursor: \(cursor), target offset: \(targetOffset), max int: \(Int.max)
                           """)
         }
+        let localOffset = self.cursor + targetOffset
+        if localOffset > self.limit {
+            throw IOError("""
+                          '\(operation)' operation overflows current section, \
+                          cursor: \(self.cursor), target offset: \(targetOffset), limit: \(self.limit)
+                          """)
+        }
+    }
+
+    mutating func section(ofLength: UInt64, withByteOrder: Endianness) throws -> Input {
+        try checkOperationOverflows(targetOffset: ofLength, operation: "section")
+        let start = self.offset + self.cursor
         return DataInput(data: self.data, offset: start, limit: ofLength, withByteOrder: withByteOrder)
     }
 
-    mutating func readString(_ ofLength: Int) throws -> String {
+    mutating func seek(to: UInt64) throws {
+        try checkOperationOverflows(targetOffset: to, operation: "seek")
+        self.cursor = to
+    }
+
+    mutating func readString(_ ofLength: UInt64) throws -> String {
+        try checkOperationOverflows(targetOffset: ofLength, operation: "readString")
         let start = self.offset + self.cursor
-        if start + ofLength >= self.data.count {
-            throw IOError("""
-                          Reading beyond section limit: \
-                          position: \(start), limit: \(self.limit), requested: \(ofLength)
-                          """)
-        }
-        if let res = String(data: self.data.subdata(in: start..<start+ofLength), encoding: .ascii) {
+        if let res = String(data: self.data.subdata(in: Int(start)..<Int(start + ofLength)), encoding: .ascii) {
             self.cursor += ofLength
             return res
         }
@@ -58,17 +70,27 @@ extension DataInput: Input {
     }
 
     mutating func readU16() throws -> UInt16 {
+        try checkOperationOverflows(targetOffset: 2, operation: "readU16")
         let start = self.offset + self.cursor
-        if start + 2 >= self.data.count {
-            throw IOError("""
-                          Failed to read UInt16: \
-                          position: \(start), limit: \(self.limit)
-                          """)
-        }
         let res: UInt16 = self.data
-                .subdata(in: start..<start + 2)
+                .subdata(in: Int(start)..<Int(start + 2))
                 .withUnsafeBytes { $0.pointee }
         self.cursor += 2
+        switch bo {
+        case .Big:
+            return res.bigEndian
+        case .Little:
+            return res.littleEndian
+        }
+    }
+
+    mutating func readU32() throws -> UInt32 {
+        try checkOperationOverflows(targetOffset: 4, operation: "readU32")
+        let start = self.offset + self.cursor
+        let res: UInt32 = self.data
+                .subdata(in: Int(start)..<Int(start + 4))
+                .withUnsafeBytes { $0.pointee }
+        self.cursor += 4
         switch bo {
         case .Big:
             return res.bigEndian

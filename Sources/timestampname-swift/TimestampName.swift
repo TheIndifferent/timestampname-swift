@@ -71,7 +71,7 @@ fileprivate func processFiles(_ filesList: Array<String>, utc: Bool) throws -> C
         let fileUrl = URL(fileURLWithPath: fileName)
         let fileExt = fileUrl.pathExtension.lowercased()
         if let extractor = extractors[fileExt] {
-            var data = try Data(contentsOf: fileUrl, options: .alwaysMapped)
+            let data = try Data(contentsOf: fileUrl, options: .alwaysMapped)
             var input: Input = DataInput(data: data)
             do {
                 let timestamp = try extractor.extractMetadataCreationTimestamp(input: &input)

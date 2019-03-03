@@ -6,8 +6,10 @@ enum Endianness {
 }
 
 protocol Input {
-    var count: Int { get }
-    mutating func section(ofLength: Int, withByteOrder: Endianness) throws -> Input;
-    mutating func readString(_ ofLength: Int) throws -> String;
+    var count: UInt64 { get }
+    mutating func section(ofLength: UInt64, withByteOrder: Endianness) throws -> Input;
+    mutating func seek(to: UInt64) throws;
+    mutating func readString(_ ofLength: UInt64) throws -> String;
     mutating func readU16() throws -> UInt16;
+    mutating func readU32() throws -> UInt32;
 }
