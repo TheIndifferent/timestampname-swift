@@ -3,6 +3,8 @@ import Foundation
 struct TiffExtractor {
 }
 
+// following resources were used to implement this parser:
+// https://www.adobe.io/content/dam/udp/en/open/standards/tiff/TIFF6.pdf
 extension TiffExtractor: Extractor {
 
     private func determineTiffEndianness(forHeader tiffEndiannessHeader: String) throws -> Endianness {
@@ -12,11 +14,10 @@ extension TiffExtractor: Extractor {
         case "MM":
             return Endianness.Big
         default:
-            throw IOError("Bad TIFF header: \(tiffEndiannessHeader)")
+            throw IOError("Bad TIFF header, expected one of 'II' or 'MM', but received: \(tiffEndiannessHeader)")
         }
     }
 
-    // https://www.adobe.io/content/dam/udp/en/open/standards/tiff/TIFF6.pdf
     func extractMetadataCreationTimestamp(input: inout Input) throws -> String {
         // Bytes 0-1: The byte order used within the file. Legal values are:
         // “II” (4949.H)

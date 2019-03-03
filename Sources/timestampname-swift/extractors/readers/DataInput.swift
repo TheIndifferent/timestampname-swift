@@ -25,19 +25,22 @@ struct DataInput {
 extension DataInput: Input {
 
     var count: UInt64 {
-        return UInt64(self.data.count)
+        return self.limit
+    }
+
+    private func checkOperationOverflows(offsetIncrement: UInt64, operation: String) throws {
+        try checkOperationOverflows(targetOffset: self.cursor + offsetIncrement, operation: operation)
     }
 
     private func checkOperationOverflows(targetOffset: UInt64, operation: String) throws {
-        let totalOffset = self.offset + self.cursor + targetOffset
+        let totalOffset = self.offset + targetOffset
         if totalOffset >= UInt64(Int.max) {
             throw IOError("""
                           '\(operation)' operation overflows platform Int value, \
                           offset: \(offset), cursor: \(cursor), target offset: \(targetOffset), max int: \(Int.max)
                           """)
         }
-        let localOffset = self.cursor + targetOffset
-        if localOffset > self.limit {
+        if targetOffset > self.limit {
             throw IOError("""
                           '\(operation)' operation overflows current section, \
                           cursor: \(self.cursor), target offset: \(targetOffset), limit: \(self.limit)
@@ -46,7 +49,7 @@ extension DataInput: Input {
     }
 
     mutating func section(ofLength: UInt64, withByteOrder: Endianness) throws -> Input {
-        try checkOperationOverflows(targetOffset: ofLength, operation: "section")
+        try checkOperationOverflows(offsetIncrement: ofLength, operation: "section")
         let start = self.offset + self.cursor
         return DataInput(data: self.data, offset: start, limit: ofLength, withByteOrder: withByteOrder)
     }
@@ -56,8 +59,13 @@ extension DataInput: Input {
         self.cursor = to
     }
 
+    mutating func ff(distance: UInt64) throws {
+        try checkOperationOverflows(offsetIncrement: distance, operation: "ff")
+        self.cursor += distance
+    }
+
     mutating func readString(_ ofLength: UInt64) throws -> String {
-        try checkOperationOverflows(targetOffset: ofLength, operation: "readString")
+        try checkOperationOverflows(offsetIncrement: ofLength, operation: "readString")
         let start = self.offset + self.cursor
         if let res = String(data: self.data.subdata(in: Int(start)..<Int(start + ofLength)), encoding: .ascii) {
             self.cursor += ofLength
@@ -70,7 +78,7 @@ extension DataInput: Input {
     }
 
     mutating func readU16() throws -> UInt16 {
-        try checkOperationOverflows(targetOffset: 2, operation: "readU16")
+        try checkOperationOverflows(offsetIncrement: 2, operation: "readU16")
         let start = self.offset + self.cursor
         let res: UInt16 = self.data
                 .subdata(in: Int(start)..<Int(start + 2))
@@ -85,7 +93,7 @@ extension DataInput: Input {
     }
 
     mutating func readU32() throws -> UInt32 {
-        try checkOperationOverflows(targetOffset: 4, operation: "readU32")
+        try checkOperationOverflows(offsetIncrement: 4, operation: "readU32")
         let start = self.offset + self.cursor
         let res: UInt32 = self.data
                 .subdata(in: Int(start)..<Int(start + 4))

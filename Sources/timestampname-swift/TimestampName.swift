@@ -62,7 +62,9 @@ fileprivate func listFiles() throws -> Array<String> {
 fileprivate func processFiles(_ filesList: Array<String>, utc: Bool) throws -> CollectedMetadata {
     let extractors: [String: Extractor] = [
         "nef": TiffExtractor(),
-        "dng": TiffExtractor()
+        "dng": TiffExtractor(),
+        "jpg": JpegExtractor(),
+        "jpeg": JpegExtractor()
     ]
     var items = [FileMetadata]()
     var longestSourceName = 0
