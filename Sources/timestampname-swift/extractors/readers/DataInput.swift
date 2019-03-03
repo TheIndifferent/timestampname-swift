@@ -37,12 +37,11 @@ extension DataInput: Input {
         if start + ofLength >= self.data.count {
             throw IOError.endOfSection(position: start, limit: self.limit, requested: ofLength)
         }
-        let res: String = self.data
-                // TODO subscript is not recognized?
-                .subdata(in: start..<start+ofLength)
-                .withUnsafeBytes { $0.pointee }
-        self.cursor += ofLength
-        return res
+        if let res = String(data: self.data.subdata(in: start..<start+ofLength), encoding: .ascii) {
+            self.cursor += ofLength
+            return res
+        }
+        throw IOError.failedToReadString(position: start, requested: ofLength)
     }
 
     mutating func readU16() throws -> UInt16 {

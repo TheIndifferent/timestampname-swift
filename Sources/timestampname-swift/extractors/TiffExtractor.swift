@@ -10,8 +10,7 @@ extension TiffExtractor: Extractor {
         // Bytes 0-1: The byte order used within the file. Legal values are:
         // “II” (4949.H)
         // “MM” (4D4D.H)
-        let tiffEndiannessHeader = try input.readString(2)
-        info(tiffEndiannessHeader)
+        let tiffEndiannessHeader: String = try input.readString(2)
         info("\n")
         return ""
     }

@@ -54,22 +54,24 @@ fileprivate func listFiles() throws -> Array<String> {
 }
 
 fileprivate func processFiles(_ filesList: Array<String>, utc: Bool) throws -> CollectedMetadata {
-    let extractorRegistry = ExtractorRegistry()
+    let extractors: [String: Extractor] = [
+        "nef": TiffExtractor(),
+        "dng": TiffExtractor()
+    ]
     var items = [FileMetadata]()
     var longestSourceName = 0
     for (index, fileName) in filesList.enumerated() {
         info("\rProcessing files: \(index + 1)/\(filesList.count)...")
-        if let fileUrl = URL(string: fileName) {
-            let fileExt = fileUrl.pathExtension
-            if let extractor = extractorRegistry.findExtractor(fileName: fileName, utc: utc) {
-                var data = try Data(contentsOf: fileUrl, options: .alwaysMapped)
-                var input: Input = DataInput(data: data)
-                let timestamp = try extractor.extractMetadataCreationTimestamp(input: &input)
-                let md = FileMetadata(fileName: fileName, creationTimestamp: timestamp, fileExt: fileExt)
-                items.append(md)
-                if fileName.count > longestSourceName {
-                    longestSourceName = fileName.count
-                }
+        let fileUrl = URL(fileURLWithPath: fileName)
+        let fileExt = fileUrl.pathExtension.lowercased()
+        if let extractor = extractors[fileExt] {
+            var data = try Data(contentsOf: fileUrl, options: .alwaysMapped)
+            var input: Input = DataInput(data: data)
+            let timestamp = try extractor.extractMetadataCreationTimestamp(input: &input)
+            let md = FileMetadata(fileName: fileName, creationTimestamp: timestamp, fileExt: fileExt)
+            items.append(md)
+            if fileName.count > longestSourceName {
+                longestSourceName = fileName.count
             }
         }
     }
