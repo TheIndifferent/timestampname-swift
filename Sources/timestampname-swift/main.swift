@@ -53,6 +53,6 @@ do {
     try execute(cmdArgs: cmdArgs)
     exit(0)
 } catch {
-    eprint("\nUnexpected error: \(error)")
+    eprint("\nUnexpected error: \(error)\n")
 }
 exit(1)

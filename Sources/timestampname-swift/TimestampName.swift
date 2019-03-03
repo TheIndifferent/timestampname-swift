@@ -4,11 +4,17 @@ func eprint(_ message: String) {
     guard let messageData = message.data(using: .utf8) else {
         return;
     }
+    // flush stdout so \r will not cripple the output:
+    FileHandle.standardOutput.synchronizeFile()
     FileHandle.standardError.write(messageData)
 }
 
 func info(_ message: String) {
-    print(message, separator: "", terminator: "")
+    // cannot use normal print because need to flush the stdout before stderr:
+    guard let messageData = message.data(using: .utf8) else {
+        return;
+    }
+    FileHandle.standardOutput.write(messageData)
 }
 
 fileprivate struct CollectedMetadata {
