@@ -32,7 +32,7 @@ extension DataInput: Input {
         let start = self.offset + self.cursor
         if start + ofLength > self.data.count {
             throw IOError("""
-                          Requested section is larger than parent section:
+                          Requested section is larger than parent section: \
                           position: \(start), limit: \(self.limit), requested: \(ofLength)
                           """)
         }
@@ -43,7 +43,7 @@ extension DataInput: Input {
         let start = self.offset + self.cursor
         if start + ofLength >= self.data.count {
             throw IOError("""
-                          Reading beyond section limit:
+                          Reading beyond section limit: \
                           position: \(start), limit: \(self.limit), requested: \(ofLength)
                           """)
         }
@@ -52,7 +52,7 @@ extension DataInput: Input {
             return res
         }
         throw IOError("""
-                      Failed to read string:
+                      Failed to read string: \
                       position: \(start), limit: \(self.limit), requested: \(ofLength)
                       """)
     }
@@ -61,7 +61,7 @@ extension DataInput: Input {
         let start = self.offset + self.cursor
         if start + 2 >= self.data.count {
             throw IOError("""
-                          Failed to read UInt16:
+                          Failed to read UInt16: \
                           position: \(start), limit: \(self.limit)
                           """)
         }
