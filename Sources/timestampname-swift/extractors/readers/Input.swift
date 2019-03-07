@@ -13,4 +13,5 @@ protocol Input {
     mutating func readString(_ ofLength: UInt64) throws -> String;
     mutating func readU16() throws -> UInt16;
     mutating func readU32() throws -> UInt32;
+    mutating func readU64() throws -> UInt64;
 }

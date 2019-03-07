@@ -106,4 +106,19 @@ extension DataInput: Input {
             return res.littleEndian
         }
     }
+
+    mutating func readU64() throws -> UInt64 {
+        try checkOperationOverflows(offsetIncrement: 8, operation: "readU64")
+        let start = self.offset + self.cursor
+        let res: UInt64 = self.data
+                .subdata(in: Int(start)..<Int(start + 8))
+                .withUnsafeBytes { $0.pointee }
+        self.cursor += 8
+        switch bo {
+        case .Big:
+            return res.bigEndian
+        case .Little:
+            return res.littleEndian
+        }
+    }
 }

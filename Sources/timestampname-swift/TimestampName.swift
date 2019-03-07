@@ -64,7 +64,8 @@ fileprivate func processFiles(_ filesList: Array<String>, utc: Bool) throws -> C
         "nef": TiffExtractor(),
         "dng": TiffExtractor(),
         "jpg": JpegExtractor(),
-        "jpeg": JpegExtractor()
+        "jpeg": JpegExtractor(),
+        "mp4": Mp4Extractor(utc: utc)
     ]
     var items = [FileMetadata]()
     var longestSourceName = 0
