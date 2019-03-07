@@ -34,7 +34,6 @@ extension FileMetadata: Comparable {
 }
 
 fileprivate func determinePrefixWidth(itemCount: Int) throws -> Int {
-    // TODO check this with exactly 99 and 100 files:
     switch itemCount {
     case 0...9:
         return 1

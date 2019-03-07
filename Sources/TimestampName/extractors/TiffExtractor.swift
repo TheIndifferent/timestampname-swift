@@ -32,9 +32,9 @@ extension TiffExtractor: Extractor {
         let bo = try determineTiffEndianness(forHeader: tiffEndiannessHeader)
 
         // TODO find a way to simplify this:
-        // rewing back because TIFF offsets are absolute:
+        // rewind back because TIFF offsets are absolute:
         try input.seek(to: 0)
-        // create a section input with specified engianness:
+        // create a section input with specified endianness:
         var bodyInput = try input.section(ofLength: input.count, withByteOrder: bo)
         // ff to skip 2 bytes header:
         try bodyInput.seek(to: 2)

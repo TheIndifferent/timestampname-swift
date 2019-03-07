@@ -15,9 +15,10 @@ extension JpegExtractor: Extractor {
             throw IOError("Bad JPEG header, expected 0xFFD8, but received: \(String(jpegSoi, radix: 16, uppercase: true))")
         }
         // scrolling through fields until we find APP1:
-        // TODO check for section size and break with meaningful error if APP1 was not found:
-        while true {
+        var left = input.count - 2 // SOI
+        while left > 0 {
             let fieldMarker = try input.readU16()
+            left -= 2
             let fieldLength = try input.readU16()
             // checking for APP1 marker:
             if fieldMarker == 0xFFE1 {
@@ -37,6 +38,8 @@ extension JpegExtractor: Extractor {
             }
             // length includes the length itself:
             try input.ff(distance: UInt64(fieldLength - 2))
+            left -= UInt64(fieldLength)
         }
+        throw IOError("JPEG APP1 marker not found")
     }
 }

@@ -2,9 +2,8 @@ import Foundation
 
 struct QuicktimeParser {
     private func searchBox(input: inout Input, requestedBoxType: String, requestedBoxUuid: (UInt64, UInt64)?) throws -> Input {
-        // TODO handle box not found till the end of section
-        while true {
-            var offset: UInt64 = 0
+        var left = input.count
+        while left > 0 {
             var boxBodyLength: UInt64
             let boxLength = try input.readU32();
             let boxType = try input.readString(4);
@@ -16,13 +15,13 @@ struct QuicktimeParser {
                 // 4 bytes for box type
                 // 8 bytes for box large length
                 boxBodyLength = boxLargeLength - 16
-                offset += 16
+                left -= 16
             } else {
                 // box length includes header, have to make adjustments:
                 // 4 bytes for box length
                 // 4 bytes for box type
                 boxBodyLength = UInt64(boxLength - 8)
-                offset += 8
+                left -= 8
             }
             if boxType == requestedBoxType {
                 if let uuid = requestedBoxUuid {
@@ -37,6 +36,12 @@ struct QuicktimeParser {
                 }
             }
             try input.ff(distance: boxBodyLength)
+            left -= boxBodyLength
+        }
+        if let uuid = requestedBoxUuid {
+            throw IOError("UUID Box was not found, msb: \(uuid.0), lsb: \(uuid.1)")
+        } else {
+            throw IOError("Box was not found: \(requestedBoxType)")
         }
     }
 
