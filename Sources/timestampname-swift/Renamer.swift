@@ -1,35 +1,35 @@
 import Foundation
 
-fileprivate func compareFileMetadatas(_ md1: FileMetadata, _ md2: FileMetadata) throws -> Bool {
-    if md1.fileName == md2.fileName {
-        throw FileError(fileName: md1.fileName, message: "File encountered twice")
+extension FileMetadata: Comparable {
+
+    public static func == (lhs: FileMetadata, rhs: FileMetadata) -> Bool {
+        return lhs.fileName == rhs.fileName && lhs.creationTimestamp == rhs.creationTimestamp
     }
-    let ct1 = md1.creationTimestamp
-    let ct2 = md2.creationTimestamp
-    if ct1 < ct2 {
-        return true
-    }
-    if ct1 > ct2 {
-        return false
-    }
-    // if we are still here - timestamps are even:
-    // workaround for Android way of dealing with same-second shots:
-    // 20180430_184327.jpg
-    // 20180430_184327(0).jpg
-    let l1 = md1.fileName.count
-    let l2 = md2.fileName.count
-    if l1 < l2 {
-        return true
-    }
-    if l1 > l2 {
-        return false
-    }
-    // now both timestamps and file names are equal,
-    // equal names case was checked at the beginning:
-    if md1.fileName < md2.fileName {
-        return true
-    } else {
-        return false
+
+    public static func < (lhs: FileMetadata, rhs: FileMetadata) -> Bool {
+        let ct1 = lhs.creationTimestamp
+        let ct2 = rhs.creationTimestamp
+        if ct1 < ct2 {
+            return true
+        }
+        if ct1 > ct2 {
+            return false
+        }
+        // if we are still here - timestamps are even:
+        // workaround for Android way of dealing with same-second shots:
+        // 20180430_184327.jpg
+        // 20180430_184327(0).jpg
+        let l1 = lhs.fileName.count
+        let l2 = rhs.fileName.count
+        if l1 < l2 {
+            return true
+        }
+        if l1 > l2 {
+            return false
+        }
+        // now both timestamps and file names are equal,
+        // comparing file names lexicographically:
+        return lhs.fileName < rhs.fileName
     }
 }
 
@@ -61,7 +61,7 @@ fileprivate func formatTargetFileName(item: FileMetadata, index: Int, prefixWidt
 
 func prepareRenameOperations(items: Array<FileMetadata>, noPrefix: Bool) throws -> Array<RenameOperation> {
     let prefixWidth = try determinePrefixWidth(itemCount: items.count)
-    let sortedItems = try items.sorted(by: compareFileMetadatas)
+    let sortedItems = items.sorted()
 
     var operations = [RenameOperation]()
     for (index, metadata) in sortedItems.enumerated() {
