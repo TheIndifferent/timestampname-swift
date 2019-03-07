@@ -44,7 +44,7 @@ struct QuicktimeParser {
         return try searchBox(input: &input, requestedBoxType: boxName, requestedBoxUuid: nil)
     }
 
-    func searchUuidBox(input: inout Input, boxUuid: String) throws -> Input {
-        throw TaskError("not implemented")
+    func searchUuidBox(input: inout Input, boxUuid: (UInt64, UInt64)) throws -> Input {
+        return try searchBox(input: &input, requestedBoxType: "uuid", requestedBoxUuid: boxUuid)
     }
 }

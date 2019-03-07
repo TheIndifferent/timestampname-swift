@@ -13,10 +13,6 @@ extension Mp4Extractor: Extractor {
         let date = Date(timeIntervalSince1970: TimeInterval(since1970))
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd-HHmmss"
-        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-        print("UTC: \(dateFormatter.string(from: date))")
-        dateFormatter.timeZone = TimeZone.current
-        print("current: \(dateFormatter.string(from: date))")
         if utc {
             dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
         } else {
