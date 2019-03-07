@@ -36,31 +36,31 @@ extension FileMetadata: Comparable {
 fileprivate func determinePrefixWidth(itemCount: Int) throws -> Int {
     // TODO check this with exactly 99 and 100 files:
     switch itemCount {
-    case 0..<10:
+    case 0...9:
         return 1
-    case 10..<100:
+    case 10...99:
         return 2
-    case 100..<1000:
+    case 100...999:
         return 3
-    case 1000..<10000:
+    case 1000...9999:
         return 4
-    case 10000..<100000:
+    case 10000...99999:
         return 5
     default:
         throw TaskError("Too many files: \(itemCount)")
     }
 }
 
-fileprivate func formatTargetFileName(item: FileMetadata, index: Int, prefixWidth: Int, noPrefix: Bool) -> String {
+fileprivate func formatTargetFileName(item: FileMetadata, index: Int, prefixFormat: String, noPrefix: Bool) -> String {
     if noPrefix {
         return "\(item.creationTimestamp).\(item.fileExt)"
     }
-    // TODO use prefixWidth to pad index with zeroes:
-    return "\(index+1)-\(item.creationTimestamp).\(item.fileExt)"
+    return "\(String(format: prefixFormat, index+1))-\(item.creationTimestamp).\(item.fileExt)"
 }
 
 func prepareRenameOperations(items: Array<FileMetadata>, noPrefix: Bool) throws -> Array<RenameOperation> {
     let prefixWidth = try determinePrefixWidth(itemCount: items.count)
+    let prefixFormat = "%0\(prefixWidth)d"
     let sortedItems = items.sorted()
 
     var operations = [RenameOperation]()
@@ -68,7 +68,7 @@ func prepareRenameOperations(items: Array<FileMetadata>, noPrefix: Bool) throws 
         let operation = RenameOperation(from: metadata.fileName,
                                         to: formatTargetFileName(item: metadata,
                                                                  index: index,
-                                                                 prefixWidth: prefixWidth,
+                                                                 prefixFormat: prefixFormat,
                                                                  noPrefix: noPrefix))
         operations.append(operation)
     }
